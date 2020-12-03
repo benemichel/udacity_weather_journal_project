@@ -7,4 +7,4 @@ The last journal posted will be displayed in the app.
 
 ## Important
 You have to enter your personal openweather API key in app.js.
-
+Run npm install first.
