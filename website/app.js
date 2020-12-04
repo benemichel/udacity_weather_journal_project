@@ -13,7 +13,7 @@ let newDate = (d.getMonth()+ 1) + '.' + d.getDate() + '.' + d.getFullYear();
 
 /* Requests functions*/
 const fetchWeatherByZip = async (baseUrl, zip, apiKey) => {
-    const fullUrl = baseUrl + `zip=${zip}&appid=${apiKey}`
+    const fullUrl = baseUrl + `zip=${zip}&appid=${apiKey}&units=metric`
 
     try {
         const res = await fetch(fullUrl);
@@ -43,7 +43,15 @@ const postJournal = async (url, data) => {
 const fetchJournals = async () => {
     try {
         const res = await fetch('journals/0');
-        return res.json();
+        const data = await res.json();
+
+        //update DOM
+        document.getElementById('date').innerHTML = `Date: ${data.date}`;
+        document.getElementById('temp').innerHTML = `Temperature: ${data.temp}°C`;
+        document.getElementById('content').innerHTML = `Your feelings: ${data.feelings}`;
+        document.getElementById('feelings').value = '';
+
+        return data;
     } catch (error) {
         console.log('fetch journal error', error);
     }
@@ -56,26 +64,22 @@ const generateJournal = async (event) => {
     const feelings = document.getElementById('feelings').value;
     const zip = document.getElementById('zip').value;
 
-    try {
-        const wx =  await fetchWeatherByZip(API_BASE_URL, zip, API_KEY );
+
+    fetchWeatherByZip(API_BASE_URL, zip, API_KEY ).then( res => {
         const postData = {
-            temp: wx.main.temp,
+            temp: res.main.temp,
             date: newDate,
             feelings: feelings,
         };
 
-        // post to and fetch from API endpoints
-        await postJournal('/journals', postData )
-        const res = await fetchJournals();
 
-         //update DOM
-         document.getElementById('date').innerHTML = `Date: ${res.date}`;
-         document.getElementById('temp').innerHTML = `Temperature: ${res.temp}°F`;
-         document.getElementById('content').innerHTML = `Your feelings: ${res.feelings}`;
-         document.getElementById('feelings').value = '';
-    } catch (error) {
-        console.log('generateJournal error', error)
-    }
+        // post to and fetch from API endpoints
+        postJournal('/journals', postData)
+    }).then( () => {
+        fetchJournals();
+    }).catch( err => {
+        console.log('generateJournal error', err)
+    })
 }
 
 const scrollToJournal = () => {

@@ -1,5 +1,5 @@
 // Setup empty JS object to act as endpoint for all routes
-let projectData = [];
+let projectData = {};
 
 // Require Express to run server and routes
 const express = require('express');
@@ -10,7 +10,7 @@ const app = express();
 /* Middleware*/
 //Here we are configuring express to use body-parser as middle-ware.
 const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 // Cors for cross origin allowance
@@ -31,26 +31,17 @@ if (process.env.NODE_ENV !== 'test') {
 /* Routes */
 // Add routes
 app.get('/journals/0', (req, res) => {
-    if (projectData.length > 0){
-        const [lastJournal] = projectData.slice(-1)
-        res.send(lastJournal);
-        res.status(200);
-    }
-    else {
-        res.send('no data available');
-        res.status(204);
-    }
+    res.send(projectData);
+    res.status(200);
 });
 
 app.post('/journals', (req, res) => {
-    const newJournal = {
-        temp: req.body.temp,
-        date: req.body.date,
-        feelings: req.body.feelings,
-    };
-    projectData.push(newJournal);
+    const data = req.body;
+    projectData['temp'] = data.temp;
+    projectData['date'] = data.date;
+    projectData['feelings'] = data.feelings;
 
-    res.send(newJournal);
+    res.send(projectData);
     res.status(200);
 });
 
